@@ -1,33 +1,34 @@
-
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulasi Gelombang Cahaya</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Gelombang Cahaya</title>
 
-<style>
-    body {
-        margin: 0;
-        background: black;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-    }
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
 
-    canvas {
-        display: block;
-        margin: auto;
-        background: #000;
-    }
+        canvas {
+            display: block;
+            margin: auto;
+            background: #000;
+        }
 
-    .controls {
-        margin: 20px;
-    }
+        .controls {
+            margin: 20px;
+        }
 
-    label {
-        display: block;
-        margin: 10px;
-    }
-</style>
+        label {
+            display: block;
+            margin: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -62,7 +63,6 @@ let frequency = 0.02;
 let speed = 0.05;
 let phase = 0;
 
-// Slider
 const ampSlider = document.getElementById("amplitude");
 const freqSlider = document.getElementById("frequency");
 const speedSlider = document.getElementById("speed");
@@ -109,3 +109,4 @@ drawWave();
 </script>
 
 </body>
+</html>
