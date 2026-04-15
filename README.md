@@ -1,57 +1,48 @@
 
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Gelombang Cahaya</title>
+<meta charset="UTF-8">
+<title>Gelombang + Suara (Fix)</title>
 
-    <style>
-        body {
-            margin: 0;
-            background: black;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        canvas {
-            display: block;
-            margin: auto;
-            background: #000;
-        }
-
-        .controls {
-            margin: 20px;
-        }
-
-        label {
-            display: block;
-            margin: 10px;
-        }
-    </style>
+<style>
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    text-align: center;
+}
+canvas {
+    display: block;
+    margin: auto;
+}
+.controls {
+    margin: 20px;
+}
+</style>
 </head>
 
 <body>
 
-<h2>Simulasi Gelombang Cahaya</h2>
+<h2>Simulasi Gelombang + Suara</h2>
 
 <canvas id="waveCanvas" width="800" height="300"></canvas>
 
 <div class="controls">
-    <label>
-        Amplitudo: <span id="ampVal">50</span>
-        <input type="range" id="amplitude" min="10" max="100" value="50">
-    </label>
+    <button id="soundBtn">NYALAKAN SUARA</button>
+    <br><br>
 
-    <label>
-        Frekuensi: <span id="freqVal">0.02</span>
-        <input type="range" id="frequency" min="0.01" max="0.1" step="0.01" value="0.02">
-    </label>
+    Amplitudo:
+    <input type="range" id="amplitude" min="10" max="100" value="50">
 
-    <label>
-        Kecepatan: <span id="speedVal">0.05</span>
-        <input type="range" id="speed" min="0.01" max="0.2" step="0.01" value="0.05">
-    </label>
+    <br>
+
+    Frekuensi (Hz):
+    <input type="range" id="frequency" min="100" max="1000" value="440">
+
+    <br>
+
+    Kecepatan:
+    <input type="range" id="speed" min="0.01" max="0.2" step="0.01" value="0.05">
 </div>
 
 <script>
@@ -59,33 +50,73 @@ const canvas = document.getElementById("waveCanvas");
 const ctx = canvas.getContext("2d");
 
 let amplitude = 50;
-let frequency = 0.02;
+let frequencyVisual = 0.02;
 let speed = 0.05;
 let phase = 0;
 
+// AUDIO
+let audioCtx = null;
+let oscillator = null;
+let gainNode = null;
+let isPlaying = false;
+
+const btn = document.getElementById("soundBtn");
+
+btn.onclick = async () => {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+    }
+
+    if (!isPlaying) {
+        oscillator = audioCtx.createOscillator();
+        gainNode = audioCtx.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.value = 440;
+
+        gainNode.gain.value = 0.1;
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+
+        isPlaying = true;
+        btn.textContent = "MATIKAN SUARA";
+    } else {
+        oscillator.stop();
+        isPlaying = false;
+        btn.textContent = "NYALAKAN SUARA";
+    }
+};
+
+// SLIDER
 const ampSlider = document.getElementById("amplitude");
 const freqSlider = document.getElementById("frequency");
 const speedSlider = document.getElementById("speed");
 
-const ampVal = document.getElementById("ampVal");
-const freqVal = document.getElementById("freqVal");
-const speedVal = document.getElementById("speedVal");
-
 ampSlider.oninput = () => {
     amplitude = ampSlider.value;
-    ampVal.textContent = amplitude;
+    if (gainNode) gainNode.gain.value = amplitude / 500;
 };
 
 freqSlider.oninput = () => {
-    frequency = freqSlider.value;
-    freqVal.textContent = frequency;
+    let f = freqSlider.value;
+
+    frequencyVisual = f / 10000;
+
+    if (oscillator) oscillator.frequency.value = f;
 };
 
 speedSlider.oninput = () => {
     speed = speedSlider.value;
-    speedVal.textContent = speed;
 };
 
+// ANIMASI
 function drawWave() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -93,7 +124,7 @@ function drawWave() {
     ctx.moveTo(0, canvas.height / 2);
 
     for (let x = 0; x < canvas.width; x++) {
-        let y = canvas.height / 2 + amplitude * Math.sin(frequency * x + phase);
+        let y = canvas.height / 2 + amplitude * Math.sin(frequencyVisual * x + phase);
         ctx.lineTo(x, y);
     }
 
